@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import {
+  clearShortcut,
   getShortcut,
   setShortcut,
   suspendShortcut,
@@ -47,5 +48,12 @@ export function useRecordShortcut(name: ShortcutName) {
     }
   }, [recording, value, name])
 
-  return { value, recording, error, start: () => setRecording(true) }
+  const clear = () => {
+    void clearShortcut(name).then(() => {
+      setValue(null)
+      setError(null)
+    })
+  }
+
+  return { value, recording, error, start: () => setRecording(true), clear }
 }

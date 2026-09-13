@@ -1,5 +1,6 @@
-//! Global shortcuts, each named so the settings UI can rebind it. Saved as a
-//! name -> shortcut map in `shortcuts.json`; missing names use their default.
+//! Global shortcuts, each named so the settings UI can bind it. Saved as a
+//! name -> shortcut map in `shortcuts.json`; there are no defaults, an unset
+//! name registers nothing.
 
 use std::{collections::BTreeMap, fs, path::PathBuf};
 use tauri::{AppHandle, Manager};
@@ -8,13 +9,11 @@ use crate::quick_note;
 
 struct Action {
     name: &'static str,
-    default: &'static str,
     run: fn(&AppHandle),
 }
 
 const ACTIONS: &[Action] = &[Action {
     name: "quick-note",
-    default: "Ctrl+Alt+D",
     run: quick_note::toggle,
 }];
 
@@ -51,10 +50,8 @@ fn save(app: &AppHandle, saved: &Saved) -> Result<(), String> {
     fs::write(path, json).map_err(|e| e.to_string())
 }
 
-fn current(app: &AppHandle, action: &Action) -> String {
-    load(app)
-        .remove(action.name)
-        .unwrap_or_else(|| action.default.to_string())
+fn current(app: &AppHandle, action: &Action) -> Option<String> {
+    load(app).remove(action.name)
 }
 
 #[cfg(desktop)]
@@ -88,23 +85,28 @@ pub fn init(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(desktop)]
     app.plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
     for action in ACTIONS {
-        // A saved shortcut this build can't parse must not block startup.
-        if register(app, action, &current(app, action)).is_err() {
-            register(app, action, action.default)?;
+        let Some(shortcut) = current(app, action) else {
+            continue;
+        };
+        // The desktop environment may own the shortcut.
+        if let Err(e) = register(app, action, &shortcut) {
+            eprintln!("shortcut {} ({shortcut}) not registered: {e}", action.name);
         }
     }
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_shortcut(app: AppHandle, name: String) -> Result<String, String> {
+pub fn get_shortcut(app: AppHandle, name: String) -> Result<Option<String>, String> {
     Ok(current(&app, action(&name)?))
 }
 
 /// Lets the settings recorder hear the current shortcut; `set` brings one back.
 #[tauri::command]
 pub fn suspend_shortcut(app: AppHandle, name: String) -> Result<(), String> {
-    unregister(&app, &current(&app, action(&name)?));
+    if let Some(shortcut) = current(&app, action(&name)?) {
+        unregister(&app, &shortcut);
+    }
     Ok(())
 }
 
@@ -113,12 +115,26 @@ pub fn suspend_shortcut(app: AppHandle, name: String) -> Result<(), String> {
 pub fn set_shortcut(app: AppHandle, name: String, shortcut: String) -> Result<(), String> {
     let action = action(&name)?;
     let old = current(&app, action);
-    unregister(&app, &old);
+    if let Some(old) = &old {
+        unregister(&app, old);
+    }
     if let Err(e) = register(&app, action, &shortcut) {
-        let _ = register(&app, action, &old);
+        if let Some(old) = &old {
+            let _ = register(&app, action, old);
+        }
         return Err(e);
     }
     let mut saved = load(&app);
     saved.insert(name, shortcut);
+    save(&app, &saved)
+}
+
+#[tauri::command]
+pub fn clear_shortcut(app: AppHandle, name: String) -> Result<(), String> {
+    if let Some(old) = current(&app, action(&name)?) {
+        unregister(&app, &old);
+    }
+    let mut saved = load(&app);
+    saved.remove(&name);
     save(&app, &saved)
 }
