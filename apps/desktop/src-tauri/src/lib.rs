@@ -15,7 +15,8 @@ pub fn run() {
             tear_off::end_tear_off,
             shortcuts::get_shortcut,
             shortcuts::suspend_shortcut,
-            shortcuts::set_shortcut
+            shortcuts::set_shortcut,
+            shortcuts::clear_shortcut
         ])
         .plugin(
             tauri_plugin_window_state::Builder::default()

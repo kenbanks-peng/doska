@@ -11,7 +11,8 @@ export function QuickNoteSection() {
 }
 
 function Shortcut() {
-  const { value, recording, error, start } = useRecordShortcut("quick-note")
+  const { value, recording, error, start, clear } =
+    useRecordShortcut("quick-note")
 
   return (
     <SettingsSection title="Quick note">
@@ -22,15 +23,22 @@ function Shortcut() {
             {error ?? "Opens the quick note from anywhere."}
           </span>
         </span>
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          className="min-w-24 font-mono"
-          onClick={start}
-        >
-          {recording ? "Press keys…" : value ? formatShortcut(value) : "…"}
-        </Button>
+        <span className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="min-w-24 font-mono"
+            onClick={start}
+          >
+            {recording ? "Press keys…" : value ? formatShortcut(value) : "Set"}
+          </Button>
+          {value && !recording && (
+            <Button type="button" variant="ghost" size="sm" onClick={clear}>
+              Clear
+            </Button>
+          )}
+        </span>
       </div>
     </SettingsSection>
   )
