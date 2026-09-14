@@ -25,6 +25,7 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL: "http://localhost:4173",
+    colorScheme: "dark",
     // Keep a trace from the failing attempt so a rare flake is debuggable after
     // the fact (`npx playwright show-trace`), without the cost on green runs.
     trace: "retain-on-failure",
