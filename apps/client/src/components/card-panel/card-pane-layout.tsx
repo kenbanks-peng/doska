@@ -28,7 +28,10 @@ export function CardPaneLayout({
       <CardContentLayout className={cn(inWindow && "overflow-y-visible")}>
         {attachments}
         <CardContent
-          className="flex flex-1 flex-col border-t-0 px-4 pt-2"
+          className={cn(
+            "flex flex-1 flex-col border-t-0 px-4 pt-2",
+            inWindow && "mt-6"
+          )}
           onClick={onClickBody}
         >
           {title}
