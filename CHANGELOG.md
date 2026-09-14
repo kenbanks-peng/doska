@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.23.2] - 2026-09-14
+
+### Fixed
+
+- The Linux AppImage opened a white window on Fedora and other distros with a
+  recent Mesa. The bundled `libwayland-client` shadowed the system one and EGL
+  failed before the first paint; it is no longer bundled. The AppImage also
+  disables the WebKitGTK DMA-BUF renderer, which blanks the window on some
+  NVIDIA and Wayland setups.
+
+## [0.23.1] - 2026-09-14
+
+### Fixed
+
+- The quick note shortcut is no longer bound by default. If the shortcut is already taken by the system, error is handled.
+
 ## [0.23.0] - 2026-09-13
 
 ### Added

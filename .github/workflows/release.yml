@@ -81,6 +81,18 @@ jobs:
           node -e "const f='apps/desktop/src-tauri/tauri.conf.json';const fs=require('fs');const j=JSON.parse(fs.readFileSync(f,'utf8'));j.version='$VERSION';fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
           echo "Stamped tauri.conf.json version = $VERSION"
 
+      # tauri-bundler downloads a July 2024 linuxdeploy that bundles libwayland-client,
+      # which breaks EGL on newer Mesa (Fedora 44+). Seed its cache with a newer one.
+      # https://github.com/tauri-apps/tauri/issues/15976
+      - name: Pin linuxdeploy
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          mkdir -p ~/.cache/tauri
+          curl -fsSL -o ~/.cache/tauri/linuxdeploy-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
+          echo "c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d  $HOME/.cache/tauri/linuxdeploy-x86_64.AppImage" | sha256sum -c
+          chmod +x ~/.cache/tauri/linuxdeploy-x86_64.AppImage
+
       - name: Write App Store Connect API key
         if: matrix.platform == 'macos-latest'
         shell: bash
@@ -107,3 +119,13 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+
+      - name: Check AppImage does not bundle libwayland-client
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          cd apps/desktop/src-tauri/target/release/bundle/appimage
+          ./*.AppImage --appimage-extract > /dev/null
+          if find squashfs-root -name 'libwayland-client.so*' | grep .; then
+            echo "AppImage bundles libwayland-client, see tauri-apps/tauri#15976"
+            exit 1
+          fi
