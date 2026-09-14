@@ -32,7 +32,7 @@ test.describe("card attachments", { tag: "@container" }, () => {
     await card(page, "Untitled card").click()
 
     await expect(
-      cardPanel(page).getByRole("button", { name: "Attach", exact: true })
+      cardPanel(page).getByRole("button", { name: "Sign in to attach files" })
     ).toBeDisabled()
   })
 
