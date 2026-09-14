@@ -43,7 +43,7 @@ export function ColumnView({
     <div
       role="group"
       aria-label={title}
-      className="flex w-full max-w-none shrink-0 snap-center flex-col overflow-y-auto overscroll-y-contain pb-6 xs:max-w-sm"
+      className="flex w-full shrink-0 snap-center flex-col overflow-y-auto overscroll-y-contain pb-6 xs:w-sm"
     >
       <div
         className={cn(
