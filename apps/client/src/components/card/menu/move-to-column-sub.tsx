@@ -4,7 +4,12 @@ import { ArrowRightLeft } from "lucide-react"
 import { useMoveCard } from "@doska/core/mutations"
 import { useBoard } from "@doska/core/queries"
 import { byPosition } from "@doska/core/utils"
+import { createElement } from "react"
+import { toast } from "react-hot-toast"
+import { CardMoveToast } from "@/components/toasts/card-move/card-move-toast"
 import { useDeck } from "@/providers/deck/deck-context"
+
+const TOAST_ID = "card-move"
 
 /** Moves the card to the end of another column. */
 export function MoveToColumnSub({ cardId }: { cardId: string }) {
@@ -16,7 +21,8 @@ export function MoveToColumnSub({ cardId }: { cardId: string }) {
   const moved = board?.cards.find((c) => c.id === cardId)
 
   function moveTo(columnId: string) {
-    if (!board || !moved || moved.columnId === columnId) return
+    const column = columns.find((c) => c.id === columnId)
+    if (!board || !moved || !column || moved.columnId === columnId) return
 
     const destCards = board.cards
       .filter((c) => c.columnId === columnId && c.id !== cardId)
@@ -25,6 +31,14 @@ export function MoveToColumnSub({ cardId }: { cardId: string }) {
     const position = generateKeyBetween(last?.position ?? null, null)
 
     moveCard([{ ...moved, columnId, position }])
+    toast.custom(
+      (toastInstance) =>
+        createElement(CardMoveToast, {
+          visible: toastInstance.visible,
+          columnTitle: column.title,
+        }),
+      { id: TOAST_ID, duration: 2500 }
+    )
   }
 
   return (
