@@ -39,6 +39,8 @@ export function CardPanelHeader({
         "flex shrink-0 items-center justify-between gap-2",
         !inWindow && "border-b",
         "px-3 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2",
+        inWindow &&
+          "fixed top-0 right-0 z-10 rounded-bl-xl bg-card/80 py-1 backdrop-blur-xs",
         windowControlsInset && "pl-24"
       )}
     >

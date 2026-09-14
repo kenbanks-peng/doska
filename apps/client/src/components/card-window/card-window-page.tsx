@@ -5,6 +5,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window"
 import { useCardSave, useDeleteCard } from "@doska/core/mutations"
 import { useCard, useCardDeckId } from "@doska/core/queries"
 import { CardPane } from "@/components/card-panel/card-pane"
+import { isDesktop } from "@/lib/platform"
 import { DeckProvider } from "@/providers/deck/deck-context"
 import { REVEAL_EVENT, type RevealPayload } from "./card-window-event"
 
@@ -21,7 +22,7 @@ export function CardWindowPage({ cardId }: IProps) {
 
   const close = useCallback(() => {
     flush()
-    void getCurrentWindow().close()
+    if (isDesktop()) void getCurrentWindow().close()
   }, [flush])
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function CardWindowPage({ cardId }: IProps) {
 
   const title = content?.title.trim()
   useEffect(() => {
-    void getCurrentWindow().setTitle(title || "Untitled card")
+    if (isDesktop()) void getCurrentWindow().setTitle(title || "Untitled card")
   }, [title])
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export function CardWindowPage({ cardId }: IProps) {
   }, [close])
 
   return (
-    <div className="flex h-svh flex-col overflow-hidden bg-card pt-5 text-sm text-card-foreground">
+    <div className="flex h-svh flex-col overflow-y-auto bg-card text-sm text-card-foreground">
       {/* The measure the card reads at; the window may be much wider. */}
       <div className="mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
         {content && deckId && (
