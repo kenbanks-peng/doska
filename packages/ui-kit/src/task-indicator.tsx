@@ -1,4 +1,5 @@
 import { cn } from "./lib/cn"
+import { useIsMobile } from "./lib/use-mobile"
 
 interface IProps {
   done: number
@@ -12,6 +13,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const CENTER = VIEWBOX / 2
 
 export function TaskIndicator({ done, total }: IProps) {
+  const isMobile = useIsMobile()
   const complete = total > 0 && done === total
   const progress = total === 0 ? 0 : done / total
 
@@ -19,10 +21,14 @@ export function TaskIndicator({ done, total }: IProps) {
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-full font-mono",
-        "text-sm text-muted-foreground tabular-nums md:text-xs"
+        "text-muted-foreground tabular-nums",
+        isMobile ? "text-sm" : "text-xs"
       )}
     >
-      <svg viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} className="size-4 md:size-3.5">
+      <svg
+        viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
+        className={isMobile ? "size-4" : "size-3.5"}
+      >
         <circle
           cx={CENTER}
           cy={CENTER}

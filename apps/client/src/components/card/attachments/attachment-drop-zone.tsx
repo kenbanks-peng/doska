@@ -1,5 +1,5 @@
 import { cn } from "@doska/ui-kit"
-import { Upload, TriangleAlert } from "lucide-react"
+import { Upload } from "lucide-react"
 import { useRef, useState, type ReactNode } from "react"
 import { useUploads } from "@/providers/attachment-upload/attachment-upload-context"
 
@@ -21,7 +21,7 @@ export function AttachmentDropZone({
   className?: string
   children: ReactNode
 }) {
-  const { addFiles, enabled, error, clearError } = useUploads()
+  const { addFiles, enabled } = useUploads()
   const [dragging, setDragging] = useState(false)
   // dragenter/leave fire per descendant; count depth so leaving a child doesn't
   // dismiss the overlay while still inside the zone.
@@ -35,7 +35,6 @@ export function AttachmentDropZone({
         e.preventDefault()
         depth.current += 1
         setDragging(true)
-        clearError()
       }}
       onDragOver={(e) => {
         if (hasFiles(e)) e.preventDefault()
@@ -69,14 +68,6 @@ export function AttachmentDropZone({
             <span className="text-sm font-medium">
               {enabled ? "Drop files to attach" : "Attachments unavailable"}
             </span>
-          </div>
-        </div>
-      )}
-      {!dragging && error && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center p-2">
-          <div className="text-destructive-foreground flex items-center gap-1.5 rounded-md bg-destructive px-2.5 py-1 text-sm shadow-e2">
-            <TriangleAlert className="size-4" />
-            {error}
           </div>
         </div>
       )}

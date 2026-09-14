@@ -104,8 +104,7 @@ export function registerFileRoutes(
       // downloads. Together these stop a same-origin script-injection via upload.
       reply.header("x-content-type-options", "nosniff")
       reply.header("content-disposition", file.disposition)
-      // Same-origin, but the bytes are private — don't let shared caches hold them.
-      reply.header("cache-control", "private, max-age=300")
+      reply.header("cache-control", "private, max-age=31536000, immutable")
       return reply.send(file.body)
     } catch {
       return reply.code(404).send({ error: "Not found" })

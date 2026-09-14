@@ -5,6 +5,9 @@ export function pasteFiles(
   onPasteFiles: (files: File[]) => Promise<string | null>
 ): Extension {
   return EditorView.domEventHandlers({
+    drop(event) {
+      return (event.dataTransfer?.files.length ?? 0) > 0
+    },
     paste(event, view) {
       const files = Array.from(event.clipboardData?.files ?? [])
       if (files.length === 0) return false

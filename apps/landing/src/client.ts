@@ -40,10 +40,10 @@ if (os) {
     label.hidden = label.dataset.os !== os
 }
 
+// Linux ships as AppImage, deb and rpm, so it stays on the releases page.
 const downloads = [
   ["a[data-dmg]", ".dmg"],
   ["a[data-exe]", "-setup.exe"],
-  ["a[data-appimage]", ".AppImage"],
 ].map(([selector, suffix]) => ({
   link: document.querySelector<HTMLAnchorElement>(selector),
   suffix,

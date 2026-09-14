@@ -1,89 +1,44 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { ThemeCtx, type Theme } from "./theme-context"
 
-type ThemeProviderProps = {
-  children: ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
-}
-
-const THEME_VALUES: Theme[] = ["dark", "light"]
+const DARK_QUERY = "(prefers-color-scheme: dark)"
 
 function isTheme(value: string | null): value is Theme {
-  return !!value && THEME_VALUES.includes(value as Theme)
+  return value === "dark" || value === "light"
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "dark",
-  storageKey = "theme",
-  ...props
-}: ThemeProviderProps) {
+function systemTheme(): Theme {
+  return window.matchMedia(DARK_QUERY).matches ? "dark" : "light"
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const storedTheme = localStorage.getItem(storageKey)
-    return isTheme(storedTheme) ? storedTheme : defaultTheme
+    const stored = localStorage.getItem("theme")
+    return isTheme(stored) ? stored : systemTheme()
   })
 
-  const setTheme = useCallback(
-    (nextTheme: Theme) => {
-      localStorage.setItem(storageKey, nextTheme)
-      setThemeState(nextTheme)
-    },
-    [storageKey]
-  )
-
-  const applyTheme = useCallback((nextTheme: Theme) => {
-    const root = document.documentElement
-
-    root.classList.remove("light", "dark")
-    root.classList.add(nextTheme)
+  useEffect(() => {
+    const query = window.matchMedia(DARK_QUERY)
+    const onChange = () => {
+      localStorage.removeItem("theme")
+      setThemeState(systemTheme())
+    }
+    query.addEventListener("change", onChange)
+    return () => query.removeEventListener("change", onChange)
   }, [])
 
   useEffect(() => {
-    applyTheme(theme)
-  }, [theme, applyTheme])
+    document.documentElement.classList.remove("light", "dark")
+    document.documentElement.classList.add(theme)
+  }, [theme])
 
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.storageArea !== localStorage) {
-        return
-      }
-
-      if (event.key !== storageKey) {
-        return
-      }
-
-      if (isTheme(event.newValue)) {
-        setThemeState(event.newValue)
-        return
-      }
-
-      setThemeState(defaultTheme)
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-    }
-  }, [defaultTheme, storageKey])
-
-  const value = useMemo(
-    () => ({
-      theme,
-      setTheme,
-    }),
-    [theme, setTheme]
-  )
+  const setTheme = (next: Theme) => {
+    localStorage.setItem("theme", next)
+    setThemeState(next)
+  }
 
   return (
-    <ThemeCtx.Provider {...props} value={value}>
+    <ThemeCtx.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeCtx.Provider>
   )

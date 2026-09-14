@@ -72,7 +72,6 @@ export function DownloadMenu() {
           target="_blank"
           rel="noreferrer"
           className={`plausible-event-name=CTA+Download+Linux ${item}`}
-          data-appimage
         >
           <FaLinux />
           Download for Linux

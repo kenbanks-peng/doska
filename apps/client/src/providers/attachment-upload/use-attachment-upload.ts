@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react"
+import { createElement, useCallback, useState } from "react"
+import { toast } from "react-hot-toast"
 import type { Attachment } from "@doska/core/types"
 import { useCard } from "@doska/core/queries"
 import { useUpdateCard } from "@doska/core/mutations"
 import { activeStorage } from "@doska/core/attachments"
 import { isSyncConfigured } from "@doska/core/server"
 import { useAuth } from "@/lib/hooks"
+import { AttachmentErrorToast } from "@/components/toasts/attachment/attachment-error-toast"
 
 /**
  * Uploading files to a card: shared by the header's Attach button and the
@@ -19,11 +21,23 @@ export interface PendingUpload {
   mime: string
 }
 
+const TOAST_ID = "attachment-error"
+
+function showError(message: string) {
+  toast.custom(
+    (toastInstance) =>
+      createElement(AttachmentErrorToast, {
+        visible: toastInstance.visible,
+        message,
+      }),
+    { id: TOAST_ID }
+  )
+}
+
 export function useAttachmentUpload(cardId: string) {
   const { data: card } = useCard(cardId)
   const { mutate: save } = useUpdateCard(cardId)
   const [pending, setPending] = useState<PendingUpload[]>([])
-  const [error, setError] = useState<string | null>(null)
 
   const { authed } = useAuth()
   const enabled = isSyncConfigured() && authed === true
@@ -41,7 +55,7 @@ export function useAttachmentUpload(cardId: string) {
       const list = files ? Array.from(files) : []
       if (!list.length) return []
       if (!enabled) {
-        setError(disabledReason)
+        if (disabledReason) showError(disabledReason)
         return []
       }
       const queued = list.map((file) => ({
@@ -50,7 +64,6 @@ export function useAttachmentUpload(cardId: string) {
         mime: file.type || "application/octet-stream",
       }))
       setPending((prev) => [...prev, ...queued])
-      setError(null)
       try {
         const storage = activeStorage()
         const added: Attachment[] = []
@@ -72,7 +85,7 @@ export function useAttachmentUpload(cardId: string) {
         save({ attachments: [...(existing ?? []), ...added] })
         return added
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed")
+        showError(err instanceof Error ? err.message : "Upload failed")
         return []
       } finally {
         setPending((prev) =>
@@ -83,14 +96,10 @@ export function useAttachmentUpload(cardId: string) {
     [cardId, enabled, disabledReason, existing, save]
   )
 
-  const clearError = useCallback(() => setError(null), [])
-
   return {
     addFiles,
-    clearError,
     pending,
     busy: pending.length > 0,
-    error,
     enabled,
     disabledReason,
   }
