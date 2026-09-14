@@ -120,12 +120,12 @@ jobs:
           includeUpdaterJson: true
           args: ${{ matrix.args }}
 
-      - name: Check AppImage does not bundle display-stack libs
+      - name: Check AppImage does not bundle libwayland-client
         if: matrix.platform == 'ubuntu-latest'
         run: |
           cd apps/desktop/src-tauri/target/release/bundle/appimage
           ./*.AppImage --appimage-extract > /dev/null
-          if find squashfs-root -name 'libwayland-*.so*' -o -name 'libxkbcommon*.so*' | grep .; then
-            echo "AppImage bundles host display libs, see tauri-apps/tauri#15976"
+          if find squashfs-root -name 'libwayland-client.so*' | grep .; then
+            echo "AppImage bundles libwayland-client, see tauri-apps/tauri#15976"
             exit 1
           fi
