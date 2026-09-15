@@ -54,6 +54,7 @@ export function CardWindowPage({ cardId }: IProps) {
                 cardId={cardId}
                 content={content}
                 onQueue={queue}
+                onFlush={flush}
                 onClose={close}
                 onDelete={() => {
                   deleteCard(cardId)
