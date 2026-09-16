@@ -11,6 +11,6 @@ description = "Build the production desktop executable without a bundle"
 run = "pnpm --filter desktop build --no-bundle"
 
 [tasks.deploy]
-description = "Build and copy the production desktop executable to ./bin"
+description = "Build and deploy the desktop executable, then install and restart the macOS server LaunchAgent"
 depends = ["build"]
-run = "mkdir -p bin && cp apps/desktop/src-tauri/target/release/deck-desktop bin/deck-desktop"
+run = "bash scripts/deploy.sh"

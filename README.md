@@ -91,6 +91,31 @@ What the compose file contains:
 - Database: pass a database URL, or the bundled Postgres is used.
 - File storage: pass S3 credentials, or files are stored on the server.
 
+### Local macOS deployment
+
+With dependencies installed and `apps/server/.env` configured, run `mise deploy`
+from this checkout. This builds and copies the desktop executable to `bin/`, then
+installs `com.kenbanks.doska.plist` into `~/Library/LaunchAgents/` and restarts the
+server for the current logged-in user (no `sudo`). The agent starts at login and
+restarts if the server exits.
+
+Deployment fills in absolute paths to this checkout and the current Node runtime.
+Keep the checkout and its dependencies in place; deploy again after moving it or
+changing Node versions. The agent uses the same entry point and `.env` file as
+`mise server`; it does not start a separate database or inherit your shell's
+environment variables. Configure any required database in `apps/server/.env`.
+
+Logs are in `~/Library/Logs/doska/server.log` and `server.error.log`. To inspect or
+stop the agent:
+
+```sh
+launchctl print "gui/$(id -u)/com.kenbanks.doska"
+launchctl bootout "gui/$(id -u)/com.kenbanks.doska"
+```
+
+To uninstall it, stop it first and remove
+`~/Library/LaunchAgents/com.kenbanks.doska.plist`.
+
 ## Updating
 
 The same script updates an existing install, and the useful part is that it takes a backup first.

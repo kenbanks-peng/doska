@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.kenbanks.doska</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>__NODE_PATH__</string>
+        <string>--env-file-if-exists=.env</string>
+        <string>--import</string>
+        <string>tsx</string>
+        <string>src/index.ts</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>__SERVER_DIRECTORY__</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>__STDOUT_PATH__</string>
+    <key>StandardErrorPath</key>
+    <string>__STDERR_PATH__</string>
+</dict>
+</plist>
