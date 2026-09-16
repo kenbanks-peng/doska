@@ -95,9 +95,17 @@ What the compose file contains:
 
 With dependencies installed and `apps/server/.env` configured, run `mise deploy`
 from this checkout. This builds and copies the desktop executable to `bin/`, then
-installs `com.kenbanks.doska.plist` into `~/Library/LaunchAgents/` and restarts the
-server for the current logged-in user (no `sudo`). The agent starts at login and
-restarts if the server exits.
+uses `com.kenbanks.doska.plist` as a template to install two LaunchAgents into
+`~/Library/LaunchAgents/`: `com.kenbanks.doska` (backend on port 3000) and
+`com.kenbanks.doska.web` (web client on port 5173). Both restart on deployment,
+start at login, and restart if they exit, for the current user (no `sudo`).
+
+Desktop sign-in opens `http://localhost:5173/sign-in?desktop=`. The web agent
+serves the built client using Vite preview and proxies API requests to
+`127.0.0.1:3000`. This is loopback-only local use, not a public production web
+server. Keep `BASE_URL=http://localhost:5173` in `apps/server/.env`. Deployment
+checks that the sign-in page and proxied authentication endpoint respond before
+reporting success.
 
 Deployment fills in absolute paths to this checkout and the current Node runtime.
 Keep the checkout and its dependencies in place; deploy again after moving it or
@@ -105,16 +113,19 @@ changing Node versions. The agent uses the same entry point and `.env` file as
 `mise server`; it does not start a separate database or inherit your shell's
 environment variables. Configure any required database in `apps/server/.env`.
 
-Logs are in `~/Library/Logs/doska/server.log` and `server.error.log`. To inspect or
-stop the agent:
+Logs are in `~/Library/Logs/doska/`: `server.log`, `server.error.log`, `web.log`,
+and `web.error.log`. To inspect or stop the agents:
 
 ```sh
 launchctl print "gui/$(id -u)/com.kenbanks.doska"
+launchctl print "gui/$(id -u)/com.kenbanks.doska.web"
 launchctl bootout "gui/$(id -u)/com.kenbanks.doska"
+launchctl bootout "gui/$(id -u)/com.kenbanks.doska.web"
 ```
 
-To uninstall it, stop it first and remove
-`~/Library/LaunchAgents/com.kenbanks.doska.plist`.
+To uninstall, stop both agents first and remove
+`~/Library/LaunchAgents/com.kenbanks.doska.plist` and
+`~/Library/LaunchAgents/com.kenbanks.doska.web.plist`.
 
 ## Updating
 

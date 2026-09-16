@@ -11,6 +11,6 @@ description = "Build the production desktop executable without a bundle"
 run = "pnpm --filter desktop build --no-bundle"
 
 [tasks.deploy]
-description = "Build and deploy the desktop executable, then install and restart the macOS server LaunchAgent"
+description = "Build and deploy the desktop executable, then install and restart the macOS backend and web LaunchAgents"
 depends = ["build"]
 run = "bash scripts/deploy.sh"
