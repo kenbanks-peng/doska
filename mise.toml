@@ -1,3 +1,11 @@
+[tasks."server:dev"]
+description = "Run the backend with hot reload and a local development database"
+run = "pnpm --filter server dev"
+
+[tasks.server]
+description = "Run the backend using the configured database"
+run = "pnpm --filter server start"
+
 [tasks.build]
 description = "Build the production desktop executable without a bundle"
 run = "pnpm --filter desktop build --no-bundle"
