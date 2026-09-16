@@ -38,7 +38,7 @@ playwright-report
 playwright/.cache
 
 # Local deployment output
-/bin/
+/bin/deck-desktop
 
 # Tauri
 # Rust build output / generated capability schemas (also covered locally in

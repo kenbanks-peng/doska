@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+nohup "$script_dir/deck-desktop" "$@" </dev/null >/dev/null 2>&1 &
