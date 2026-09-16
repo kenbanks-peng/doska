@@ -144,37 +144,48 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return
-          // Reachable only through the lazily-imported calendar. Naming any
-          // chunk for these pulls them in eagerly — a manual assignment
-          // overrides Rollup's dynamic-import split — so they fall through to
-          // keep the deferral `date-input-calendar` is written to get.
-          if (/[\\/](date-fns|react-day-picker)[\\/]/.test(id)) return
-          // Editor
-          if (
-            /[\\/](@codemirror|@lezer|@marijn|style-mod|w3c-keyname|crelt)[\\/]/.test(
-              id
-            )
-          )
-            return
-          // The markdown parsing stack (the unified/remark/micromark/mdast
-          // ecosystem) is the heaviest dep.
-          if (
-            /[\\/](remark|micromark|mdast|hast|unist|unified|vfile|property-information|character-entities|decode-named-character-reference|html-url-attributes|space-separated-tokens|comma-separated-tokens|trough|bail|devlop|zwitch|ccount|escape-string-regexp|markdown-table)/.test(
-              id
-            )
-          ) {
-            return "markdown"
-          }
-          if (id.includes("@hello-pangea/dnd")) return "dnd"
-          if (/[\\/](motion|motion-dom|motion-utils)[\\/]/.test(id))
-            return "motion"
-          if (id.includes("@base-ui")) return "base-ui"
-          if (/[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return "react"
-          return "vendor"
+        codeSplitting: {
+          groups: [
+            {
+              name: "editor-parser",
+              test: /[\\/]@lezer[\\/]/,
+              // Capture parsers before the editor group collects its dependencies.
+              priority: 10,
+            },
+            {
+              name(id) {
+                if (!id.includes("node_modules")) return
+                // Leave calendar dependencies to automatic splitting so they
+                // stay behind the calendar's dynamic import.
+                if (/[\\/](date-fns|react-day-picker)[\\/]/.test(id)) return
+                // Keep the editor stack out of the main application chunk.
+                if (
+                  /[\\/](@codemirror|@marijn|style-mod|w3c-keyname|crelt)[\\/]/.test(
+                    id
+                  )
+                )
+                  return "editor"
+                // The markdown parsing stack (the unified/remark/micromark/mdast
+                // ecosystem) is the heaviest dep.
+                if (
+                  /[\\/](remark|micromark|mdast|hast|unist|unified|vfile|property-information|character-entities|decode-named-character-reference|html-url-attributes|space-separated-tokens|comma-separated-tokens|trough|bail|devlop|zwitch|ccount|escape-string-regexp|markdown-table)/.test(
+                    id
+                  )
+                ) {
+                  return "markdown"
+                }
+                if (id.includes("@hello-pangea/dnd")) return "dnd"
+                if (/[\\/](motion|motion-dom|motion-utils)[\\/]/.test(id))
+                  return "motion"
+                if (id.includes("@base-ui")) return "base-ui"
+                if (/[\\/](react|react-dom|scheduler)[\\/]/.test(id))
+                  return "react"
+                return "vendor"
+              },
+            },
+          ],
         },
       },
     },
