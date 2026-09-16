@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+script_path="${BASH_SOURCE[0]}"
+while [[ -L "$script_path" ]]; do
+  script_dir="$(cd -- "$(dirname -- "$script_path")" && pwd)"
+  script_path="$(readlink "$script_path")"
+  [[ "$script_path" = /* ]] || script_path="$script_dir/$script_path"
+done
+script_dir="$(cd -- "$(dirname -- "$script_path")" && pwd)"
+
+if [[ ! -x "$script_dir/deck-desktop" ]]; then
+  printf 'doska: executable not found: %s\n' "$script_dir/deck-desktop" >&2
+  exit 1
+fi
+
 nohup "$script_dir/deck-desktop" "$@" </dev/null >/dev/null 2>&1 &
