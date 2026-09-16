@@ -1,3 +1,8 @@
 [tasks.build]
 description = "Build the production desktop executable without a bundle"
 run = "pnpm --filter desktop build --no-bundle"
+
+[tasks.deploy]
+description = "Build and copy the production desktop executable to ./bin"
+depends = ["build"]
+run = "mkdir -p bin && cp apps/desktop/src-tauri/target/release/deck-desktop bin/deck-desktop"

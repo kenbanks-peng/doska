@@ -37,6 +37,9 @@ test-results
 playwright-report
 playwright/.cache
 
+# Local deployment output
+/bin/
+
 # Tauri
 # Rust build output / generated capability schemas (also covered locally in
 # apps/desktop/src-tauri/.gitignore; kept here as a safety net).
